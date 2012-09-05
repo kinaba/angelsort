@@ -10,8 +10,9 @@
 }
 </style>
 <script src="kinetic-v4.0.1.js"></script>
+<script src="advisory.js"></script>
+<script src="sort.js"></script>
 <script>
-
 function Oracle(n)
 {
 	var dn = new Array(n);
@@ -159,194 +160,10 @@ function Oracle(n)
 		return a;
 	};
 }
-
-function Angel(n) {
-	var self = new Oracle(n);
-	var meaningful_compare_count = 0;
-
-	self.meaningful_comparison = function() {
-		return meaningful_compare_count;
-	};
-
-	self.getComparator = function() { return function(x, y) {
-		var t = self.compare(x, y);
-		if( t != null )
-			return t;
-		var xy = self.income_for(self.below(x), self.above(y));
-		var yx = self.income_for(self.below(y), self.above(x));
-		if( xy < yx )
-			self.commit(y, x);
-		else
-			self.commit(x, y);
-		meaningful_compare_count++;
-		return self.try_compare(x, y);
-	}};
-	return self;
-}
-
-
-function Random(n) {
-	var self = new Oracle(n);
-	var meaningful_compare_count = 0;
-
-	self.meaningful_comparison = function() {
-		return meaningful_compare_count;
-	};
-
-	self.getComparator = function() { return function(x, y) {
-		var t = self.compare(x, y);
-		if( t != null )
-			return t;
-		var xy = self.income_for(self.below(x), self.above(y));
-		var yx = self.income_for(self.below(y), self.above(x));
-		if( Math.random() < Math.sqrt(xy)/(Math.sqrt(xy)+Math.sqrt(yx)) )
-			self.commit(y, x);
-		else
-			self.commit(x, y);
-		meaningful_compare_count++;
-		return self.try_compare(x, y);
-	}};
-	return self;
-}
-
-
-function Devil(n) {
-	var self = new Oracle(n);
-	var meaningful_compare_count = 0;
-
-	self.meaningful_comparison = function() {
-		return meaningful_compare_count;
-	};
-
-	self.getComparator = function() { return function(x, y) {
-		var t = self.compare(x, y);
-		if( t != null )
-			return t;
-		var xy = self.income_for(self.below(x), self.above(y));
-		var yx = self.income_for(self.below(y), self.above(x));
-		if( xy < yx )
-			self.commit(x, y);
-		else
-			self.commit(y, x);
-		meaningful_compare_count++;
-		return self.try_compare(x, y);
-	}};
-	return self;
-}
 </script>
 
 <script>
-function quickSort(arr, cmp) {
-	function impl(s, e) {
-		if(e-s <= 1)
-			return;
-		var p=arr[s], i=s+1, j=e;
-		while(i<j) {
-			while(i<j && cmp(arr[i],p)<=0) ++i;
-			while(i<j && cmp(arr[j-1],p)>0)  --j;
-			if(i<j) {var t=arr[i]; arr[i]=arr[j-1]; arr[j-1]=t;}
-		}
-		if(i==e) {
-			{var t=arr[s]; arr[s]=arr[e-1]; arr[e-1]=t;}
-			impl(s, e-1);
-		} else {
-			impl(s, i);
-			impl(i, e);
-		}
-	};
-	impl(0, arr.length);
-}
-
-function mergeSort(arr, cmp) {
-	function impl(s, e) {
-		if(e-s<=1)
-			return;
-		var m = (e+s)>>1;
-		impl(s, m);
-		impl(m, e);
-		var merged = [];
-		var i=s, k=m;
-		while(i<m && k<e)
-			merged.push( cmp(arr[i],arr[k])<0 ? arr[i++] : arr[k++] );
-		while(i<m)
-			merged.push(arr[i++]);
-		while(k<e)
-			merged.push(arr[k++]);
-		for(var i=s; i<e; ++i)
-			arr[i] = merged[i-s];
-	}
-	impl(0, arr.length);
-}
-
-function bubbleSort(arr, cmp) {
-	for(var i=0; i<arr.length; ++i)
-	for(var k=0; k+1<arr.length-i; ++k)
-		if(cmp(arr[k], arr[k+1]) > 0)
-			{var t=arr[k]; arr[k]=arr[k+1]; arr[k+1]=t;}
-}
-
-function stdSort(arr, cmp) {
-	arr.sort(cmp);
-}
-
-function heapSort(arr, cmp) {
-	for(var i=1; i<arr.length; ++i) {
-		var p=i;
-		while(p>0) {
-			var pp = (p-1)>>1;
-			if( cmp(arr[pp], arr[p])<0 ) {
-				{var t=arr[pp]; arr[pp]=arr[p]; arr[p]=t;}
-				p = pp;
-			} else {
-				break;
-			}
-		}
-	}
-	for(var i=arr.length-1; i>0; --i) {
-		{var t=arr[0]; arr[0]=arr[i]; arr[i]=t;}
-		var p=0;
-		while(p*2+1<i) {
-			var pc = (p*2+2>=i || cmp(arr[p*2+1], arr[p*2+2])>0) ? p*2+1 : p*2+2;
-			if( cmp(arr[p], arr[pc])<0 ) {
-				{var t=arr[pc]; arr[pc]=arr[p]; arr[p]=t;}
-				p = pc;
-			} else {
-				break;
-			}
-		}
-	}
-}
-
-function heapSort2(arr, cmp) {
-	for(var i=arr.length-1; i>=0; --i) {
-		var p=i;
-		while(p*2+1<arr.length) {
-			var pc = (p*2+2>=arr.length || cmp(arr[p*2+1], arr[p*2+2])>0) ? p*2+1 : p*2+2;
-			if( cmp(arr[p], arr[pc])<0 ) {
-				{var t=arr[pc]; arr[pc]=arr[p]; arr[p]=t;}
-				p = pc;
-			} else {
-				break;
-			}
-		}
-	}
-	for(var i=arr.length-1; i>0; --i) {
-		{var t=arr[0]; arr[0]=arr[i]; arr[i]=t;}
-		var p=0;
-		while(p*2+1<i) {
-			var pc = (p*2+2>=i || cmp(arr[p*2+1], arr[p*2+2])>0) ? p*2+1 : p*2+2;
-			if( cmp(arr[p], arr[pc])<0 ) {
-				{var t=arr[pc]; arr[pc]=arr[p]; arr[p]=t;}
-				p = pc;
-			} else {
-				break;
-			}
-		}
-	}
-}
-</script>
-<script>
-var N = 16;
+var N = null;
 var oracle = null;
 var tr = null;
 var tr_i = null;
@@ -440,11 +257,14 @@ window.onload = function() {
 		var alg = document.getElementById("algo").value;
 		var ora = document.getElementById("oracle").value;
 		N = Number(document.getElementById("N").value);
-		var trace = window[ora](N);
-		window[alg](trace.getTestArray(), trace.getComparator());
+
+		var tr = []
+		window.SortAlgorithm[alg](
+			(new Oracle(N)).getTestArray(),
+			window.Advisory[ora](N, tr));
 
 		window.oracle = new Oracle(N);
-		window.tr = trace.getCommitSequence();
+		window.tr = tr; //trace.getCommitSequence();
 		window.tr_i = 0;
 		start();
 	});
@@ -454,16 +274,15 @@ window.onload = function() {
 <body>
 	<form id="form">
 		<select id="algo">
-			<option value="stdSort">Array.sort</option>
-			<option value="bubbleSort">Bubble</option>
-			<option value="quickSort">Quick</option>
-			<option value="mergeSort">Merge</option>
-			<option value="heapSort">Heap</option>
-			<option value="heapSort2">Heap:2</option>
+			<option value=".sort()">Array.sort</option>
+			<option value="Bubble">Bubble</option>
+			<option value="Quick">Quick</option>
+			<option value="Merge">Merge</option>
+			<option value="Heap[1]">Heap</option>
+			<option value="Heap[2]">Heap:2</option>
 		</select>
 		<select id="oracle">
 			<option value="Angel">Angel</option>
-			<option value="Random">Average?</option>
 			<option value="Devil">Devil</option>
 		</select>
 		<select id="N">
