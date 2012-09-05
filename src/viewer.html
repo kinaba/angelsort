@@ -10,10 +10,10 @@
 }
 </style>
 <script src="kinetic-v4.0.1.js"></script>
-<script src="advisory.js"></script>
+<script src="oracle.js"></script>
 <script src="sort.js"></script>
 <script>
-function Oracle(n)
+function Replay(n)
 {
 	var dn = new Array(n);
 	var up = new Array(n);
@@ -260,10 +260,10 @@ window.onload = function() {
 
 		var tr = []
 		window.SortAlgorithm[alg](
-			(new Oracle(N)).getTestArray(),
-			window.Advisory[ora](N, tr));
+			(new Replay(N)).getTestArray(),
+			window.Oracle[ora](N, tr));
 
-		window.oracle = new Oracle(N);
+		window.oracle = new Replay(N);
 		window.tr = tr; //trace.getCommitSequence();
 		window.tr_i = 0;
 		start();

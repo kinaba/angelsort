@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// Collection of sort advisory generators. They have the following signature
+// Collection of sort oracle generators. They have the following signature
 //
 //   Function foo(int N, int[2][] Output);
 //
@@ -7,7 +7,7 @@
 // N is the size of the array to be sorted, and Output is the array to record
 // the list of comparisons executed during sorting. For example, if Output[0]
 // is [9, 2], then it means that the first comparison was to compared the 2nd
-// and the 9th element of the array, and the advisory determined that 9th<2nd.
+// and the 9th element of the array, and the oracle determined that 9th<2nd.
 //
 //  * Angel : she tries to finish the sorting as fast as possible.
 //  * Devil : she tries to slow down the sorting as mush as possible.
@@ -16,11 +16,11 @@
 // ported to other programming languages.
 //----------------------------------------------------------------------------
 
-var ADV_UNKNOWN = 0;
-var ADV_LESS = -1;
-var ADV_MORE = +1;
+var K_UNKNOWN = 0;
+var K_LESS = -1;
+var K_MORE = +1;
 
-var Advisory =
+var Oracle =
 {
 	"Angel": function(N, Output)
 	{
@@ -33,53 +33,53 @@ var Advisory =
 		for(var i=0; i<N; ++i) {
 			fact[i] = new Array(N);
 			for(var j=0; j!=N; ++j)
-				fact[i][j] = ADV_UNKNOWN;
+				fact[i][j] = K_UNKNOWN;
 		}
 
 		return function(a, b) {
 			if( a == b )
 				return false;
 
-			if( fact[a][b] == ADV_UNKNOWN )
+			if( fact[a][b] == K_UNKNOWN )
 			{
 				// a < b としたら何個確定が増えるか？
 				var ab = 0;
-				for(var x=0; x<N; ++x) if(x==a || fact[x][a]==ADV_LESS)
-				for(var y=0; y<N; ++y) if(y==b || fact[b][y]==ADV_LESS)
-					if(x!=y && fact[x][y]==ADV_UNKNOWN)
+				for(var x=0; x<N; ++x) if(x==a || fact[x][a]==K_LESS)
+				for(var y=0; y<N; ++y) if(y==b || fact[b][y]==K_LESS)
+					if(x!=y && fact[x][y]==K_UNKNOWN)
 						ab++;
 
 				// b < a としたら何個確定が増えるか？
 				var ba = 0;
-				for(var x=0; x<N; ++x) if(x==b || fact[x][b]==ADV_LESS)
-				for(var y=0; y<N; ++y) if(y==a || fact[a][y]==ADV_LESS)
-					if(x!=y && fact[x][y]==ADV_UNKNOWN)
+				for(var x=0; x<N; ++x) if(x==b || fact[x][b]==K_LESS)
+				for(var y=0; y<N; ++y) if(y==a || fact[a][y]==K_LESS)
+					if(x!=y && fact[x][y]==K_UNKNOWN)
 						ba++;
 
 				// Angel は確定が増える方を選ぶ
 				if( ab > ba )
 				{
 					// a < b としました。
-					for(var x=0; x<N; ++x) if(x==a || fact[x][a]==ADV_LESS)
-					for(var y=0; y<N; ++y) if(y==b || fact[b][y]==ADV_LESS)
-						if(x!=y && fact[x][y]==ADV_UNKNOWN) {
-							fact[x][y] = ADV_LESS;
-							fact[y][x] = ADV_MORE;
+					for(var x=0; x<N; ++x) if(x==a || fact[x][a]==K_LESS)
+					for(var y=0; y<N; ++y) if(y==b || fact[b][y]==K_LESS)
+						if(x!=y && fact[x][y]==K_UNKNOWN) {
+							fact[x][y] = K_LESS;
+							fact[y][x] = K_MORE;
 						}
 				}
 				else
 				{
 					// b < a としました。
-					for(var x=0; x<N; ++x) if(x==b || fact[x][b]==ADV_LESS)
-					for(var y=0; y<N; ++y) if(y==a || fact[a][y]==ADV_LESS)
-						if(x!=y && fact[x][y]==ADV_UNKNOWN) {
-							fact[x][y] = ADV_LESS;
-							fact[y][x] = ADV_MORE;
+					for(var x=0; x<N; ++x) if(x==b || fact[x][b]==K_LESS)
+					for(var y=0; y<N; ++y) if(y==a || fact[a][y]==K_LESS)
+						if(x!=y && fact[x][y]==K_UNKNOWN) {
+							fact[x][y] = K_LESS;
+							fact[y][x] = K_MORE;
 						}
 				}
 			}
-			Output.push(fact[a][b]==ADV_LESS ? [a,b] : [b,a]);
-			return (fact[a][b] == ADV_LESS);
+			Output.push(fact[a][b]==K_LESS ? [a,b] : [b,a]);
+			return (fact[a][b] == K_LESS);
 		};
 	},
 
@@ -89,53 +89,53 @@ var Advisory =
 		for(var i=0; i<N; ++i) {
 			fact[i] = new Array(N);
 			for(var j=0; j!=N; ++j)
-				fact[i][j] = ADV_UNKNOWN;
+				fact[i][j] = K_UNKNOWN;
 		}
 
 		return function(a, b) {
 			if( a == b )
 				return false;
 
-			if( fact[a][b] == ADV_UNKNOWN )
+			if( fact[a][b] == K_UNKNOWN )
 			{
 				// a < b としたら何個確定が増えるか？
 				var ab = 0;
-				for(var x=0; x<N; ++x) if(x==a || fact[x][a]==ADV_LESS)
-				for(var y=0; y<N; ++y) if(y==b || fact[b][y]==ADV_LESS)
-					if(x!=y && fact[x][y]==ADV_UNKNOWN)
+				for(var x=0; x<N; ++x) if(x==a || fact[x][a]==K_LESS)
+				for(var y=0; y<N; ++y) if(y==b || fact[b][y]==K_LESS)
+					if(x!=y && fact[x][y]==K_UNKNOWN)
 						ab++;
 
 				// b < a としたら何個確定が増えるか？
 				var ba = 0;
-				for(var x=0; x<N; ++x) if(x==b || fact[x][b]==ADV_LESS)
-				for(var y=0; y<N; ++y) if(y==a || fact[a][y]==ADV_LESS)
-					if(x!=y && fact[x][y]==ADV_UNKNOWN)
+				for(var x=0; x<N; ++x) if(x==b || fact[x][b]==K_LESS)
+				for(var y=0; y<N; ++y) if(y==a || fact[a][y]==K_LESS)
+					if(x!=y && fact[x][y]==K_UNKNOWN)
 						ba++;
 
 				// Devil は確定が減る方を選ぶ
 				if( ab < ba )
 				{
 					// a < b としました。
-					for(var x=0; x<N; ++x) if(x==a || fact[x][a]==ADV_LESS)
-					for(var y=0; y<N; ++y) if(y==b || fact[b][y]==ADV_LESS)
-						if(x!=y && fact[x][y]==ADV_UNKNOWN) {
-							fact[x][y] = ADV_LESS;
-							fact[y][x] = ADV_MORE;
+					for(var x=0; x<N; ++x) if(x==a || fact[x][a]==K_LESS)
+					for(var y=0; y<N; ++y) if(y==b || fact[b][y]==K_LESS)
+						if(x!=y && fact[x][y]==K_UNKNOWN) {
+							fact[x][y] = K_LESS;
+							fact[y][x] = K_MORE;
 						}
 				}
 				else
 				{
 					// b < a としました。
-					for(var x=0; x<N; ++x) if(x==b || fact[x][b]==ADV_LESS)
-					for(var y=0; y<N; ++y) if(y==a || fact[a][y]==ADV_LESS)
-						if(x!=y && fact[x][y]==ADV_UNKNOWN) {
-							fact[x][y] = ADV_LESS;
-							fact[y][x] = ADV_MORE;
+					for(var x=0; x<N; ++x) if(x==b || fact[x][b]==K_LESS)
+					for(var y=0; y<N; ++y) if(y==a || fact[a][y]==K_LESS)
+						if(x!=y && fact[x][y]==K_UNKNOWN) {
+							fact[x][y] = K_LESS;
+							fact[y][x] = K_MORE;
 						}
 				}
 			}
-			Output.push(fact[a][b]==ADV_LESS ? [a,b] : [b,a]);
-			return (fact[a][b] == ADV_LESS);
+			Output.push(fact[a][b]==K_LESS ? [a,b] : [b,a]);
+			return (fact[a][b] == K_LESS);
 		};
 	},
 };
