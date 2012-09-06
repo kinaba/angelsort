@@ -148,4 +148,30 @@ var SortAlgorithm =
 			}
 		}
 	},
+
+	"Insertion": function(arr, less_more)
+	{
+		for(var i=1; i<arr.length; ++i)
+			for(var k=i-1; k>=0; --k)
+				if(less_more(arr[k], arr[k+1]))
+					break;
+				else
+					swap(arr, k, k+1);
+	},
+
+	"Shell": function(arr, less_more)
+	{
+		var h = 1;
+		while((3*h+1)*2 < arr.length)
+			h = 3*h + 1;
+
+		for(; h>0; h=(h-1)/3)
+			for(var s=0; s<h; ++s)
+				for(var i=s+h; i<arr.length; i+=h)
+					for(var k=i-h; k>=0; k-=h)
+						if(less_more(arr[k], arr[k+h]))
+							break;
+						else
+							swap(arr, k, k+h);
+	},
 };

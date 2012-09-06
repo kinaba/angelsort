@@ -67,7 +67,7 @@ var Oracle =
 						ba++;
 
 				// Angel wants to make sort faster, so she likes to fill more cells.
-				if( ab > ba )
+				if( ab >= ba )
 				{
 					// It's a<b!
 					for(var x=0; x<N; ++x) if(x==a || fact[x][a]==K_LESS)
