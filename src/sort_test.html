@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Devils and Angels</title>
+<script src="sort.js"></script>
+<script>
+Array.prototype.shuffle = function()
+{
+	for(var i=this.length; i>0; ) {
+		var j = Math.floor(Math.random()*i);
+		var t = this[--i];
+		this[i] = this[j];
+		this[j] = t;
+	}
+}
+
+Array.prototype.copy = function()
+{
+	return Array.apply(null,this);
+}
+
+window.onload = function()
+{
+	var N = 100;
+
+	var ul = document.getElementById("ul");
+	for(var alg in SortAlgorithm)
+	{
+		var li = document.createElement("li");
+		ul.appendChild(li);
+		li.appendChild(document.createTextNode(alg + ": "));
+		testAlg(SortAlgorithm[alg], li);
+	}
+
+	function testAlg(algo, li)
+	{
+		var total_cnt = 0;
+		var times = 1000;
+		for(var i=0; i<times; ++i) {
+			var arr = []
+			for(var k=0; k<N; ++k) arr.push(k);
+			if(i==0) {} // sorted
+			else if(i==1) {for(var k=0; k<N; ++k) arr[k]=N-1-k;} // rev
+			else arr.shuffle();
+			var cnt = 0;
+			algo(arr, function cmp(x,y) {++cnt; return x<y;});
+			total_cnt += cnt;
+
+			for(var k=0; k<N; ++k)
+				if(arr[k] != k) {
+					li.appendChild(document.createTextNode("[FAIL] "+arr));
+					return;
+				}
+		}
+
+		var ave = total_cnt / times;
+		li.appendChild(document.createTextNode("[OK] "+ave));
+	}
+}
+</script>
+</head>
+<body>
+	<p>Testing with 100 element arrays...</p>
+	<ul id="ul"></ul>
+</body>
+</html>

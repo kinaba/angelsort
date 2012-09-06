@@ -37,7 +37,7 @@ var SortAlgorithm =
 			while(i<j) {
 				while(i<j && !less_more(p, arr[i]))  ++i;
 				while(i<j && less_more(p, arr[j-1])) --j;
-				if(i<j) swap(arr, i, j-1);
+				if(i<j) {swap(arr, i, j-1); ++i; --j;}
 			}
 			if(i==e) {
 				swap(arr, s, e-1);
@@ -53,14 +53,10 @@ var SortAlgorithm =
 	///
 	/// Merge Sort, implemented by a top-down recursion.
 	///
-	"Merge": function(arr, less_more)
+	"Merge (t)": function(arr, less_more)
 	{
-		function impl(s, e) {
-			if(e-s<=1)
-				return;
-			var m = (e+s)>>1;
-			impl(s, m);
-			impl(m, e);
+		function merge(s, m, e)
+		{
 			var merged = [];
 			var i=s, k=m;
 			while(i<m && k<e)
@@ -72,23 +68,46 @@ var SortAlgorithm =
 			for(var i=s; i<e; ++i)
 				arr[i] = merged[i-s];
 		}
+
+		function impl(s, e) {
+			if(e-s<=1)
+				return;
+			var m = (e+s)>>1;
+			impl(s, m);
+			impl(m, e);
+			merge(s, m, e);
+		}
 		impl(0, arr.length);
 	},
 
 	///
-	/// Bubble Sort, bubbles up the bigger to the right.
+	/// Merge Sort, implemented by bottom-up building.
 	///
-	"Bubble": function(arr, less_more) {
-		for(var i=0; i<arr.length; ++i)
-		for(var k=0; k+1<arr.length-i; ++k)
-			if(less_more(arr[k+1], arr[k]))
-				swap(arr, k, k+1);
+	"Merge (b)": function(arr, less_more)
+	{
+		function merge(s, m, e)
+		{
+			var merged = [];
+			var i=s, k=m;
+			while(i<m && k<e)
+				merged.push(less_more(arr[i], arr[k]) ? arr[i++] : arr[k++]);
+			while(i<m)
+				merged.push(arr[i++]);
+			while(k<e)
+				merged.push(arr[k++]);
+			for(var i=s; i<e; ++i)
+				arr[i] = merged[i-s];
+		}
+
+		for(var w=2; w/2<arr.length; w*=2)
+			for(var s=0; s+w/2<arr.length; s+=w)
+				merge(s, s+w/2, Math.min(s+w, arr.length));
 	},
 
 	///
 	/// Heap Sort, O(n log n) construction and O(n log n) extraction.
 	///
-	"Heap (v1)": function(arr, less_more)
+	"Heap (t)": function(arr, less_more)
 	{
 		for(var i=1; i<arr.length; ++i) {
 			var p=i;
@@ -120,7 +139,7 @@ var SortAlgorithm =
 	///
 	/// Heap Sort, O(n) construction and O(n log n) extraction.
 	///
-	"Heap (v2)": function(arr, less_more)
+	"Heap (b)": function(arr, less_more)
 	{
 		for(var i=arr.length-1; i>=0; --i) {
 			var p=i;
@@ -149,16 +168,9 @@ var SortAlgorithm =
 		}
 	},
 
-	"Insertion": function(arr, less_more)
-	{
-		for(var i=1; i<arr.length; ++i)
-			for(var k=i-1; k>=0; --k)
-				if(less_more(arr[k], arr[k+1]))
-					break;
-				else
-					swap(arr, k, k+1);
-	},
-
+	///
+	/// Shell sort with 1,4,13,40,... steps.
+	///
 	"Shell": function(arr, less_more)
 	{
 		var h = 1;
@@ -173,5 +185,28 @@ var SortAlgorithm =
 							break;
 						else
 							swap(arr, k, k+h);
+	},
+
+	///
+	/// Insertion sort with linear search.
+	///
+	"Insertion": function(arr, less_more)
+	{
+		for(var i=1; i<arr.length; ++i)
+			for(var k=i-1; k>=0; --k)
+				if(less_more(arr[k], arr[k+1]))
+					break;
+				else
+					swap(arr, k, k+1);
+	},
+
+	///
+	/// Bubble Sort, bubbles up the bigger to the right.
+	///
+	"Bubble": function(arr, less_more) {
+		for(var i=0; i<arr.length; ++i)
+		for(var k=0; k+1<arr.length-i; ++k)
+			if(less_more(arr[k+1], arr[k]))
+				swap(arr, k, k+1);
 	},
 };
