@@ -16,6 +16,16 @@ function swap(a, i, k)
 var SortAlgorithm =
 {
 	///
+	/// .sort() method of JavaScript Arrays.
+	///
+	".sort()": function(arr, less_more)
+	{
+		arr.sort(function(a,b) {
+			return (a==b ? 0 : less_more(a,b) ? -1 : +1);
+		});
+	},
+
+	///
 	/// Quick Sort, with no attempt for clever pivoting.
 	///
 	"Quick": function(arr, less_more)
@@ -76,19 +86,9 @@ var SortAlgorithm =
 	},
 
 	///
-	/// .sort() method of JavaScript Arrays.
-	///
-	".sort()": function(arr, less_more)
-	{
-		arr.sort(function(a,b) {
-			return (a==b ? 0 : less_more(a,b) ? -1 : +1);
-		});
-	},
-
-	///
 	/// Heap Sort, O(n log n) construction and O(n log n) extraction.
 	///
-	"Heap[1]": function(arr, less_more)
+	"Heap (v1)": function(arr, less_more)
 	{
 		for(var i=1; i<arr.length; ++i) {
 			var p=i;
@@ -120,7 +120,7 @@ var SortAlgorithm =
 	///
 	/// Heap Sort, O(n) construction and O(n log n) extraction.
 	///
-	"Heap[2]": function(arr, less_more)
+	"Heap (v2)": function(arr, less_more)
 	{
 		for(var i=arr.length-1; i>=0; --i) {
 			var p=i;

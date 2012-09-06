@@ -2,298 +2,69 @@
 <html>
 <head>
 <title>Devils and Angels</title>
-<style type="text/css">
-#container {
-	width: 578px;
-	height: 363px;
-	background: #efe;
-}
-</style>
 <script src="kinetic-v4.0.1.js"></script>
 <script src="oracle.js"></script>
 <script src="sort.js"></script>
+<script src="player.js"></script>
 <script>
-function Replay(n)
+window.onload = function()
 {
-	var dn = new Array(n);
-	var up = new Array(n);
-	var commit_sequence = new Array()
-	var compare_count = 0;
-	for(var v=0; v!=n; ++v) dn[v] = {};
-	for(var v=0; v!=n; ++v) up[v] = {};
-
-	this.commit = function(small, big) {
-		commit_sequence.push([small, big]);
-		up[small][big] = true;
-		dn[big][small] = true;
-	};
-
-	function closure(next, v) {
-		var result = {};
-		result[v] = true;
-		for(;;) {
-			var changed = false;
-			for(var u in result)
-				for(var t in next[u])
-					if(!(t in result)) {
-						result[t] = true;
-						changed = true;
-					}
-			if(!changed)
-				break;
-		}
-		return result;
-	};
-
-	this.above = function(v) {
-		return closure(up, v);
-	};
-
-	this.below = function(v) {
-		return closure(dn, v);
-	};
-
-	this.related = function(v) {
-		var result = {};
-		var arr = new Array();
-		result[v] = true;
-		arr.push(v);
-		for(;;) {
-			var changed = false;
-			for(var u in result) {
-				for(var t in dn[u])
-					if(!(t in result)) {
-						result[t] = true;
-						arr.push(Number(t));
-						changed = true;
-					}
-				for(var t in up[u])
-					if(!(t in result)) {
-						result[t] = true;
-						arr.push(Number(t));
-						changed = true;
-					}
-			}
-			if(!changed)
-				break;
-		}
-		return arr.sort(function(a,b){return a-b;});
-	};
-
-	this.compare = function(x, y) {
-		++compare_count;
-		return this.try_compare(x, y);
-	};
-
-	this.try_compare = function(x, y) {
-		if(x == y)
-			return 0;
-		if(x in this.below(y))
-			return -1;
-		if(y in this.below(x))
-			return +1;
-		return null;
-	};
-
-	this.income_for = function(uu, vv) {
-		var cnt = 0;
-		for(var u in uu)
-		for(var v in vv)
-			if(this.try_compare(u,v) == null)
-				cnt++;
-		return cnt;
-	};
-
-	this.total_comparison = function() {
-		return compare_count;
-	};
-
-	this.getTestArray = function() {
-		var a = new Array(n);
-		for(var i=0; i!=n; ++i) a[i] = i;
-		return a;
-	};
-
-	this.getCommitSequence = function() {
-		return commit_sequence;
-	};
-
-	this.lines = function() {
-		var a = new Array();
-		for(var v=0; v!=n; ++v)
-		for(var u in dn[v])
-			a.push([u,v]);
-		return a;
-	};
-
-	this.dots = function() {
-		var level = new Array(n);
-		function rec(v) {
-			if(level[v] === undefined) {
-				level[v] = 0;
-				for(var u in dn[v])
-					level[v] = Math.max(level[v], rec(u)+1);
-			}
-			return level[v];
-		}
-		var maxlevel = 0;
-		for(var v=0; v!=n; ++v) maxlevel=Math.max(maxlevel, rec(v));
-
-		var a = new Array();
-		var X_UNIT = 0.8/n;
-		var Y_UNIT = 0.8/(maxlevel==0 ? 1 : maxlevel);
-		var xl = 0.1;
-		for(var v=0; v!=n; ++v) if(!a[v]) {
-			var uu = this.related(v);
-			var levelcnt = new Array(n);
-			var lc = 0;
-			var maxX = xl;
-			for(var k=0; k<uu.length; ++k) {
-				var u = uu[k];
-				var x = xl + X_UNIT*lc;
-				maxX = Math.max(maxX, x);
-				a[u] = {x: x, y: 0.9-Y_UNIT*level[u]};
-				lc ++;
-			}
-			xl = maxX + X_UNIT;
-		}
-		return a;
-	};
-}
-</script>
-
-<script>
-var N = null;
-var oracle = null;
-var tr = null;
-var tr_i = null;
-var timer = null;
-
-function step() {
-  if(tr_i < tr.length) {
-	oracle.commit(tr[tr_i][0], tr[tr_i][1]);
-	tr_i ++;
-	return true;
-  }
-  return false;
-}
-
-function drawLines(lineLayer, dotLayer) { return function() {
-	var canvas = lineLayer.getCanvas();
-	canvas.clear();
-	var context = canvas.getContext();
-	var dots = dotLayer.getChildren();
-	var lines = oracle.lines();
-
-	for(var i=0; i<lines.length; ++i) {
-		context.beginPath();
-		var p = dots[lines[i][0]];
-		context.moveTo(p.attrs.x, p.attrs.y);
-		var q = dots[lines[i][1]];
-		context.lineTo(q.attrs.x, q.attrs.y);
-		context.lineWidth = 2;
-		context.strokeStyle = "gray";
-		context.stroke();
+	function create_option(value) {
+		var elem = document.createElement("option");
+		elem.value = value;
+		elem.text  = value;
+		return elem;
 	}
-}}
 
-function tango(layer) {
-	if(!step()) return;
-	var dots = oracle.dots();
-	for(var n = 0; n < layer.getChildren().length; n++) {
-		var shape = layer.getChildren()[n];
-		var stage = shape.getStage();
-	 	shape.transitionTo({
-			rotation: Math.random() * Math.PI * 2,
-			x: dots[n].x * stage.getWidth(),
-			y: dots[n].y * stage.getHeight(),
-			duration: 1,
-			easing: 'ease-in-out'
-		});
-	}
-	timer = setTimeout(function(){tango(layer);}, 1500);
-}
+	var algoList = document.getElementById("algorithm");
+	for(var key in window.SortAlgorithm)
+		algoList.add(create_option(key));
 
-var stage = null;
-function start() {
-	if(!stage) {
-		stage = new Kinetic.Stage({
-			container: 'container',
-			width:  578,
-			height: 363
-		});
-	} else {
-		stage.reset();
-	}
-	var layer = new Kinetic.Layer();
+	var oracleList = document.getElementById("oracle");
+	for(var key in window.Oracle)
+		oracleList.add(create_option(key));
 
-//	var colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'cyan', 'magenta'];
-	var dots = oracle.dots();
-	for(var n=0; n<N; ++n) {
-		var shape = new Kinetic.RegularPolygon({
-			x: dots[n].x * stage.getWidth(),
-			y: dots[n].y * stage.getHeight(),
-			sides: 6,
-			radius: 10,
-			fill: '#'+Math.random().toString(16).slice(-6),
-			stroke: 'black',
-			strokeWidth: 2
-		});
-		layer.add(shape);
-	}
-	var line_layer = new Kinetic.Layer();
-	layer.beforeDraw(drawLines(line_layer, layer));
-	stage.add(line_layer);
-	stage.add(layer);
-	timer = setTimeout(timer = function(){tango(layer);}, 1500);
-	return false;
-};
+	var sizeList = document.getElementById("N");
 
-window.onload = function() {
+	var player = new Player(document.getElementById("container"));
+
 	var form = document.getElementById("form");
 	form.addEventListener('submit', function(e){
 		e.preventDefault();
-		if(timer)clearTimeout(timer);
-		var alg = document.getElementById("algo").value;
-		var ora = document.getElementById("oracle").value;
-		N = Number(document.getElementById("N").value);
 
-		var tr = []
-		window.SortAlgorithm[alg](
-			(new Replay(N)).getTestArray(),
-			window.Oracle[ora](N, tr));
-
-		window.oracle = new Replay(N);
-		window.tr = tr; //trace.getCommitSequence();
-		window.tr_i = 0;
-		start();
+		var N = Number(sizeList.value);
+		var tr = GenerateTraceWithOracle(
+			window.Oracle[oracleList.value],
+			window.SortAlgorithm[algoList.value], N);
+		player.start(N, tr);
 	});
 }
 </script>
+<style type="text/css">
+html, body { margin: 0; height: 100%; overflow-y: hidden; }
+form { margin: 0.2em; }
+a { text-decoration: none; }
+a { color: blue; }
+a:hover { text-decoration: underline; }
+#container {
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	overflow-y: hidden;
+	background: #efe;
+	position: absolute;
+	z-index: -2;
+}
+</style>
 </head>
 <body>
-	<form id="form">
-		<select id="algo">
-			<option value=".sort()">Array.sort</option>
-			<option value="Bubble">Bubble</option>
-			<option value="Quick">Quick</option>
-			<option value="Merge">Merge</option>
-			<option value="Heap[1]">Heap</option>
-			<option value="Heap[2]">Heap:2</option>
-		</select>
-		<select id="oracle">
-			<option value="Angel">Angel</option>
-			<option value="Random">Random</option>
-			<option value="Devil">Devil</option>
-		</select>
-		<select id="N">
-			<option value="16">16</option>
-			<option value="32">32</option>
-			<option value="8">8</option>
-		</select>
-		<input type="submit" value="start" />
-	</form>
 	<div id="container"></div>
-	<p>by <a href="https://twitter.com/kinaba/status/242985964451016705">@kinaba</a></p>
+	<form id="form">
+		<select id="algorithm"></select>
+		<select id="oracle"></select>
+		<input type="number" id="N" min="1" max="64" value="16" />
+		<input type="submit" value="start" />
+		<a target="_blank" href="https://github.com/kinaba/angelsort">(source)</a>
+	</form>
 </body>
 </html>

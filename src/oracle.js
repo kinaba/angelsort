@@ -16,6 +16,17 @@
 // ported to other programming languages.
 //----------------------------------------------------------------------------
 
+function GenerateTraceWithOracle(oracle, algorithm, N)
+{
+	var a = new Array(N);
+	for(var i=0; i<N; ++i)
+		a[i] = i;
+	var tr = [];
+	algorithm(a, oracle(N, tr));
+	return tr;
+}
+
+
 var K_UNKNOWN = 0;
 var K_LESS = -1;
 var K_MORE = +1;
