@@ -1,47 +1,60 @@
+var N = null;
+var oracle = null;
+var tr = null;
+var tr_i = null;
+var timer = null;
+
 function Replay(n)
 {
-	var dn = new Array(n);
-	var up = new Array(n);
-	for(var v=0; v!=n; ++v) dn[v] = {};
-	for(var v=0; v!=n; ++v) up[v] = {};
+	var fact = new Array(n);
+	for(var x=0; x<n; ++x) {
+		fact[x] = new Array(n);
+		for(var y=0; y<n; ++y)
+			fact[x][y] = 0;
+	}
+
+	var uf = new Array(n);
+	var sz = new Array(n);
+	for(var x=0; x<n; ++x) {uf[x]=x; sz[x]=1;}
+	function find(x) {
+		return (uf[x]==x ? x : (uf[x]=find(uf[x])));
+	}
+	function union(x, y) {
+		x = find(x);
+		y = find(y);
+		if( x != y ) {
+			if(sz[x] < sz[y]) {
+				uf[x] = y;
+				sz[y] += sz[x];
+			} else {
+				uf[y] = x;
+				sz[x] += sz[y];
+			}
+		}
+	}
 
 	this.commit = function(small, big) {
-		up[small][big] = true;
-		dn[big][small] = true;
+		union(small, big);
+		for(var x=0; x<N; ++x) if(x==small || fact[x][small]==-1)
+		for(var y=0; y<N; ++y) if(y==big   || fact[big][y]==-1)
+			if(x!=y && fact[x][y]==0) {
+				fact[x][y] = -1;
+				fact[y][x] = +1;
+			}
 	};
 
 	this.related = function(v) {
-		var result = {};
-		var arr = new Array();
-		result[v] = true;
-		arr.push(v);
-		for(;;) {
-			var changed = false;
-			for(var u in result) {
-				for(var t in dn[u])
-					if(!(t in result)) {
-						result[t] = true;
-						arr.push(Number(t));
-						changed = true;
-					}
-				for(var t in up[u])
-					if(!(t in result)) {
-						result[t] = true;
-						arr.push(Number(t));
-						changed = true;
-					}
-			}
-			if(!changed)
-				break;
-		}
-		return arr.sort(function(a,b){return a-b;});
+		var arr = [];
+		for(var u=0; u<n; ++u)
+			if(find(u) == find(v))
+				arr.push(u);
+		return arr;
 	};
 
 	this.lines = function() {
 		var a = new Array();
-		for(var v=0; v!=n; ++v)
-		for(var u in dn[v])
-			a.push([u,v]);
+		for(var i=0; i<tr_i; ++i)
+			a.push(tr[i]);
 		return a;
 	};
 
@@ -50,7 +63,7 @@ function Replay(n)
 		function rec(v) {
 			if(level[v] === undefined) {
 				level[v] = 0;
-				for(var u in dn[v])
+				for(var u=0; u<n; ++u) if(fact[u][v]==-1)
 					level[v] = Math.max(level[v], rec(u)+1);
 			}
 			return level[v];
@@ -79,12 +92,6 @@ function Replay(n)
 		return a;
 	};
 }
-
-var N = null;
-var oracle = null;
-var tr = null;
-var tr_i = null;
-var timer = null;
 
 function step() {
   if(tr_i < tr.length) {
