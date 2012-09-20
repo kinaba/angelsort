@@ -39,13 +39,9 @@ var SortAlgorithm =
 				while(i<j && less_more(p, arr[j-1])) --j;
 				if(i<j) {swap(arr, i, j-1); ++i; --j;}
 			}
-			if(i==e) {
-				swap(arr, s, e-1);
-				impl(s, e-1);
-			} else {
-				impl(s, i);
-				impl(i, e);
-			}
+			swap(arr, s, i-1);
+			impl(s, i-1);
+			impl(i, e);
 		};
 		impl(0, arr.length);
 	},
@@ -178,13 +174,9 @@ var SortAlgorithm =
 			h = 3*h + 1;
 
 		for(; h>0; h=(h-1)/3)
-			for(var s=0; s<h; ++s)
-				for(var i=s+h; i<arr.length; i+=h)
-					for(var k=i-h; k>=0; k-=h)
-						if(less_more(arr[k], arr[k+h]))
-							break;
-						else
-							swap(arr, k, k+h);
+			for(var i=h; i<arr.length; ++i)
+				for(var k=i-h; k>=0 && !less_more(arr[k], arr[k+h]); k-=h)
+					swap(arr, k, k+h);
 	},
 
 	///
@@ -193,11 +185,8 @@ var SortAlgorithm =
 	"Insertion": function(arr, less_more)
 	{
 		for(var i=1; i<arr.length; ++i)
-			for(var k=i-1; k>=0; --k)
-				if(less_more(arr[k], arr[k+1]))
-					break;
-				else
-					swap(arr, k, k+1);
+			for(var k=i-1; k>=0 && !less_more(arr[k], arr[k+1]); --k)
+				swap(arr, k, k+1);
 	},
 
 	///
@@ -205,8 +194,8 @@ var SortAlgorithm =
 	///
 	"Bubble": function(arr, less_more) {
 		for(var i=0; i<arr.length; ++i)
-		for(var k=0; k+1<arr.length-i; ++k)
-			if(less_more(arr[k+1], arr[k]))
-				swap(arr, k, k+1);
+			for(var k=0; k+1<arr.length-i; ++k)
+				if(less_more(arr[k+1], arr[k]))
+					swap(arr, k, k+1);
 	},
 };
