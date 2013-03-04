@@ -13,12 +13,17 @@ arr.sort! do |a,b|
 	elsif fact[a][b] != 0
 		-fact[a][b]
 	else
-		# approximate
-		as,al,bs,bl=1,1,1,1
-		N.times{|x| fact[x][a]==-1 && as+=1; fact[x][a]==+1 && al+=1 }
-		N.times{|x| fact[x][b]==-1 && bs+=1; fact[x][b]==+1 && bl+=1 }
+		ab, ba = 0, 0
+		N.times{|x| if (x==a || fact[x][a]==-1)
+		N.times{|y| if (y==b || fact[b][y]==-1)
+			ab += 1 if x!=y && fact[x][y]==0
+		end}end}
+		N.times{|x| if (x==b || fact[x][b]==-1)
+		N.times{|y| if (y==a || fact[a][y]==-1)
+			ba += 1 if x!=y && fact[x][y]==0
+		end}end}
 
-		if as*bl < bs*al
+		if ab < ba
 			N.times{|x| if (x==a || fact[x][a]==-1)
 			N.times{|y| if (y==b || fact[b][y]==-1)
 				if x!=y && fact[x][y]==0
