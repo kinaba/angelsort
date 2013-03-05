@@ -1,12 +1,37 @@
 
 N = (ARGV[0] || 100).to_i
+arr = [*0...N]
 
-fact = (0...N).map{(0...N).map{0}}
 cnt = 0
 
-# fact[x][y] == -1 <==> x<y
+# Fact table: fact[x][y] == -1 <==> x<y
+#             fact[x][y] ==  0 <==> unknown
+#             fact[x][y] == +1 <==> x>y
+fact = (0...N).map{(0...N).map{0}}
 
-arr = [*0...N]
+# |fact| is the current knowledge. What can we infer if we knew a<b?
+def enumerate_determined_pairs(a,b,fact)
+	yield [a,b]
+	for x in 0...N
+		if x!=a && x!=b
+			# x<a ==> x<b
+			if fact[x][a]==-1 && fact[x][b]==0
+				yield [x,b]
+			end
+			# b<x ==> a<x
+			if fact[b][x]==-1 && fact[a][x]==0
+				yield [a,x]
+				for y in 0...N
+					# b<x & y<a => y<x
+					if y!=a && y!=b && fact[y][a]==-1 && fact[y][x]==0
+						yield [y,x]
+					end
+				end
+			end
+		end
+	end
+end
+
 arr.sort! do |a,b|
 	cnt += 1
 
@@ -15,35 +40,15 @@ arr.sort! do |a,b|
 	elsif fact[a][b] != 0
 		fact[a][b]
 	else
-		abq, ab = [[a,b,:phase0,a,b]], []
-		baq, ba = [[b,a,:phase0,b,a]], []
-		while abq.size>0 || baq.size>0
-			break if ab.size<ba.size && abq.size==0
-			break if ba.size<ab.size && baq.size==0
-			do_ab  = (abq.size!=0 && (baq.size==0 || ab.size<ba.size))
-			theq   = (do_ab ? abq : baq)
-			thec   = (do_ab ? ab : ba)
-			x,y,ph,aa,bb = theq.shift
-			case ph # [p-a-b-q]
-				when :phase0 # [a-b] ==> [a-q] [p-b]
-					thec.push [x,y]
-					theq.push [x,0,:phase1,aa,bb]
-					theq.push [0,y,:phase2,aa,bb]
-				when :phase1 # [a-q]
-					if fact[bb][y]==-1 && fact[x][y]==0 && y!=bb
-						thec.push [x,y]
-						theq.push [0,y,:phase2,aa,bb] 
-					end
-					theq.push [x,y+1,:phase1,aa,bb] if y+1<N
-				when :phase2 # [p-b] or [p-q]
-					if fact[x][aa]==-1 && fact[x][y]==0 && x!=aa
-						thec.push [x,y]
-					end
-					theq.push [x+1,y,:phase2,aa,bb] if x+1<N
-			end
+		ab,abq = [], to_enum(:enumerate_determined_pairs,a,b,fact)
+		ba,baq = [], to_enum(:enumerate_determined_pairs,b,a,fact)
+		# Choose the shorter of {|ab|, |ba|}, without fully enumerating the longer one.
+		use_ab = nil
+		loop do
+			ba << baq.next rescue (use_ab = false; break)
+			ab << abq.next rescue (use_ab = true; break)
 		end
-
-		(ab.size < ba.size ? ab : ba).each do |x,y|
+		(use_ab ? ab : ba).each do |x,y|
 			fact[x][y] = -1
 			fact[y][x] = +1
 		end
