@@ -1,5 +1,5 @@
 
-N = 100
+N = ARGV[0].to_i || 50
 
 fact = (0...N).map{(0...N).map{0}}
 cnt = 0
