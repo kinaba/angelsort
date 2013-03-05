@@ -4,7 +4,7 @@ N = ARGV[0].to_i || 50
 fact = (0...N).map{(0...N).map{0}}
 cnt = 0
 # fact[x][y] == -1 <==> x<y
-
+tick = 0
 arr = [*0...N]
 arr.sort! do |a,b|
 	cnt += 1
@@ -19,6 +19,7 @@ arr.sort! do |a,b|
 		# similarly for b<a
 		ba, ba_x, ba_y = [[b,a]], [], []
 		for z in 0...N
+			tick += 1
 			if z!=a && z!=b
 				(ab_x<<z; ab<<[z,b]) if fact[z][a]==-1
 				(ab_y<<z; ab<<[a,z]) if fact[b][z]==-1
@@ -30,13 +31,14 @@ arr.sort! do |a,b|
 		# Compute the elements of (ab - ab_x - ab_y) and (ba - ba_x - ba_y) incrementally.
 		ab_i = ba_i = 0
 		loop do
+			tick += 1
 			ab_alive = ab_i < ab_x.size*ab_y.size
 			ba_alive = ba_i < ba_x.size*ba_y.size
 			break if !ab_alive && !ba_alive
 			# What we want to know is whether |ab| < |ba| or not.
 			# If it is determined, break immediately.
-			break if ab.size<ba.size && !ab_alive
-			break if ba.size<ab.size && !ba_alive
+			#break if ab.size<ba.size && !ab_alive
+			#break if ba.size<ab.size && !ba_alive
 
 			do_ab = (ab_alive && (!ba_alive || ab.size<ba.size))
 			if do_ab
@@ -52,6 +54,7 @@ arr.sort! do |a,b|
 
 		# Commit the comparison result set that has less information.
 		(ab.size < ba.size ? ab : ba).each do |x,y|
+			tick += 1
 			fact[x][y] = -1
 			fact[y][x] = +1
 		end
@@ -63,6 +66,7 @@ puts cnt
 worst = [nil]*N;
 (0...N).each{|i| worst[arr[i]] = i }
 p worst
+p tick
 
 cnt = 0;
 worst.sort{|a,b| cnt+=1; a<=>b}
