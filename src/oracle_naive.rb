@@ -4,6 +4,8 @@ N = 100
 fact = (0...N).map{(0...N).map{0}}
 cnt = 0
 
+# fact[x][y] == -1 <==> x<y
+
 arr = [*0...N]
 arr.sort! do |a,b|
 	cnt += 1
@@ -11,7 +13,7 @@ arr.sort! do |a,b|
 	if a == b
 		0
 	elsif fact[a][b] != 0
-		-fact[a][b]
+		fact[a][b]
 	else
 		ab, ba = 0, 0
 		N.times{|x| if (x==a || fact[x][a]==-1)
@@ -40,7 +42,7 @@ arr.sort! do |a,b|
 				end
 			end}end}
 		end
-		-fact[a][b]
+		fact[a][b]
 	end
 end
 
