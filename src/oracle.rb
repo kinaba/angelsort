@@ -57,7 +57,7 @@ arr.sort! do |a,b|
 end
 
 puts cnt
-worst = [nil]*N;
+worst = []
 (0...N).each{|i| worst[arr[i]] = i }
 p worst
 
