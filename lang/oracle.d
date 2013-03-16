@@ -3,7 +3,7 @@ import std.stdio;
 import std.random;
 import std.typecons;
 
-const N = 50;
+const N = 1000;
 
 void main()
 {
@@ -64,7 +64,7 @@ void main()
 						}
 						++x;
 					}
-					throw new Exception("done");
+					return tuple(-1,-1);
 				}
 			}
 			auto abq = new enumerator(a,b,fact);
@@ -73,8 +73,8 @@ void main()
 
 			bool use_ab = false;
 			for(;;) {
-				try { ba ~= baq.next(); } catch { use_ab = false; break; }
-				try { ab ~= abq.next(); } catch { use_ab = true; break; }
+				auto bai = baq.next(); if(bai[0]==-1) {use_ab=false; break;}  ba ~= bai;
+				auto abi = abq.next(); if(abi[0]==-1) {use_ab=true; break;}  ab ~= abi;
 			}
 			foreach(xy; use_ab ? ab : ba) {
 				int x = xy[0], y = xy[1];
@@ -87,7 +87,7 @@ void main()
 
 		int[] arr;
 		foreach(i; 0..N) arr ~= i;
-		sort!(hack,SwapStrategy.stable)(arr);
+		sort!(hack)(arr);
 		writeln(counter);
 	}
 	{
