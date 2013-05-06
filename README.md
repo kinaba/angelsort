@@ -1,6 +1,8 @@
 angelsort
 =========
 
+Running demo is at: http://www.kmonos.net/wlog/sub/angelsort/viewer.html
+
 Have you ever read "A Killer Adversary for Quicksort"
  http://www.cs.dartmouth.edu/~doug/mdmspe.pdf ?
 In this fantastic paper, a malicious "compare" function that finds
